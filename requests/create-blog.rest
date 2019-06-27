@@ -1,0 +1,8 @@
+POST http://localhost:3001/api/blogs
+Content-Type: application/json
+
+{
+  "title": "The Mythbuster’s Guide to Saving Money on Energy Bills",
+  "author": "Miss Thrifty",
+  "url": "https://www.miss-thrifty.co.uk/the-mythbusters-guide-to-saving-money-on-energy-bills/"
+}
