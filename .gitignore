@@ -1,2 +1,5 @@
 .env
 node_modules
+tests/average.test.js
+tests/palindrome.test.js
+utils/for_testing.js
