@@ -6,6 +6,7 @@ const morgan = require('morgan');
 const config = require('./utils/config');
 const blogsRouter = require('./controllers/blog');
 const middleware = require('./utils/middleware');
+const logger = require('./utils/logger');
 
 const app = express();
 
@@ -13,15 +14,18 @@ mongoose
   .set('useFindAndModify', false)
   .connect(config.DB_URI, { useNewUrlParser: true })
   .then(() => {
-    console.log('DB Connected');
+    logger.info('DB Connected');
   })
   .catch((e) => {
-    console.log(`Could not connect DB: ${e.message}`);
+    logger.error(`Could not connect DB: ${e.message}`);
   });
 
 app.use(cors());
 app.use(bodyParser.json());
-app.use(morgan('dev'));
+
+if (process.env.NODE_ENV !== 'test') {
+  app.use(morgan('dev'));
+}
 
 app.use('/api/blogs', blogsRouter);
 
