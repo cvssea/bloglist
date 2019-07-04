@@ -1,4 +1,5 @@
 const Blog = require('../models/blog');
+const User = require('../models/user');
 
 const invalidId = '5d1a602ef02eb5b36388be';
 const missingId = '5d1a602ef02eb5b36388bef0';
@@ -19,10 +20,22 @@ const blogsInDb = async () => {
   return blogs.map(blog => blog.toJSON());
 };
 
+const defaultUser = {
+  username: 'root',
+  password: 'root',
+};
+
+const usersInDb = async () => {
+  const users = await User.find({});
+  return users.map(u => u.toJSON());
+};
+
 module.exports = {
   invalidId,
   missingId,
   newBlog,
   emptyBlog,
   blogsInDb,
+  defaultUser,
+  usersInDb,
 };

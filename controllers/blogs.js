@@ -1,10 +1,14 @@
 /* eslint-disable consistent-return */
 const blogsRouter = require('express').Router();
 const Blog = require('../models/blog');
+const User = require('../models/user');
 
 blogsRouter.get('/', async (req, res, next) => {
   try {
-    const blogs = await Blog.find({});
+    const blogs = await Blog
+      .find({})
+      .populate('user', { username: 1 });
+
     res.json(blogs.map(b => b.toJSON()));
   } catch (e) {
     next(e);
@@ -24,10 +28,20 @@ blogsRouter.get('/:id', async (req, res, next) => {
 });
 
 blogsRouter.post('/', async (req, res, next) => {
-  const blog = new Blog({ ...req.body });
+  const { userId } = req.body;
+  const user = await User.findById(userId);
+
+  const blog = new Blog({
+    ...req.body,
+    user: userId,
+  });
 
   try {
     const savedBlog = await blog.save();
+
+    user.blogs = [savedBlog, ...user.blogs];
+    await user.save();
+
     res.json(savedBlog.toJSON());
   } catch (e) {
     next(e);
