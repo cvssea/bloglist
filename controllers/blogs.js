@@ -35,6 +35,7 @@ blogsRouter.post('/', async (req, res, next) => {
     ...req.body,
     user: userId,
   });
+  delete blog.userId;
 
   try {
     const savedBlog = await blog.save();

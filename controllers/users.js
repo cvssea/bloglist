@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const usersRouter = require('express').Router();
 const User = require('../models/user');
+const { PasswordError } = require('./users_helper');
 
 usersRouter.get('/', async (req, res, next) => {
   try {
@@ -17,6 +18,10 @@ usersRouter.get('/', async (req, res, next) => {
 usersRouter.post('/', async (req, res, next) => {
   try {
     const { name, username, password } = req.body;
+
+    if (username.length > 2 && password.length < 3) {
+      throw new PasswordError('Invalid password, must be at least 3 characters long');
+    }
 
     const saltRounds = 10;
     const passwordHash = await bcrypt.hash(password, saltRounds);

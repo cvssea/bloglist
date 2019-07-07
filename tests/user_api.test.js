@@ -4,6 +4,7 @@ const User = require('../models/user');
 const app = require('../app');
 const {
   defaultUser,
+  invalidUser,
   usersInDb,
 } = require('./test_helper');
 
@@ -44,6 +45,28 @@ describe('when there is one user in db', () => {
       .expect('Content-Type', /application\/json/);
 
     expect(response.body).toContain('to be unique');
+  });
+
+  describe('creating users with invalid credentials', () => {
+    test('fails with 400 & err message when username length < 3', async () => {
+      const response = await api
+        .post('/api/users')
+        .send({ ...invalidUser, password: 'valid' })
+        .expect(400)
+        .expect('Content-Type', /application\/json/);
+
+      expect(response.body).toContain('minimum allowed length');
+    });
+
+    test('fails with 400 & err message when password length < 3', async () => {
+      const response = await api
+        .post('/api/users')
+        .send({ ...invalidUser, username: 'valid' })
+        .expect(400)
+        .expect('Content-Type', /application\/json/);
+
+      expect(response.body).toContain('Invalid password');
+    });
   });
 });
 

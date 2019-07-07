@@ -25,6 +25,11 @@ const defaultUser = {
   password: 'root',
 };
 
+const invalidUser = {
+  username: 'yo',
+  password: 'se',
+};
+
 const usersInDb = async () => {
   const users = await User.find({});
   return users.map(u => u.toJSON());
@@ -33,6 +38,7 @@ const usersInDb = async () => {
 module.exports = {
   invalidId,
   missingId,
+  invalidUser,
   newBlog,
   emptyBlog,
   blogsInDb,
