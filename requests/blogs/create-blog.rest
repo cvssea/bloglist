@@ -1,9 +1,9 @@
 POST http://localhost:3001/api/blogs
 Content-Type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImRhYnJhbW92IiwiaWQiOiI1ZDIyMTUxYzk3YzYxZTM1Njc4ZTBiMmMiLCJpYXQiOjE1NjI1MjA4NjB9.U3uvSzVO_WjGInDadSblcUn3s07bOkteilgFCpcR1z0
 
 {
   "title": "The Mythbuster’s Guide to Saving Money on Energy Bills",
   "author": "Miss Thrifty",
-  "url": "https://www.miss-thrifty.co.uk/the-mythbusters-guide-to-saving-money-on-energy-bills/",
-  "userId": "5d1e50b76650b511fb84efe1"
+  "url": "https://www.miss-thrifty.co.uk/the-mythbusters-guide-to-saving-money-on-energy-bills/"
 }

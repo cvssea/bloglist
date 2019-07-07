@@ -1,13 +1,13 @@
 const bcrypt = require('bcrypt');
 const usersRouter = require('express').Router();
 const User = require('../models/user');
-const { PasswordError } = require('./users_helper');
+const { PasswordError } = require('./helpers/users_helper');
 
 usersRouter.get('/', async (req, res, next) => {
   try {
     const users = await User
       .find({})
-      .populate('blogs', { author: 1, url: 1 });
+      .populate('blogs', { author: 1, url: 1, title: 1 });
 
     res.json(users);
   } catch (e) {

@@ -1,5 +1,7 @@
+/* eslint-disable no-underscore-dangle */
 /* eslint-disable consistent-return */
 const blogsRouter = require('express').Router();
+const jwt = require('jsonwebtoken');
 const Blog = require('../models/blog');
 const User = require('../models/user');
 
@@ -7,7 +9,7 @@ blogsRouter.get('/', async (req, res, next) => {
   try {
     const blogs = await Blog
       .find({})
-      .populate('user', { username: 1 });
+      .populate('user', { username: 1, name: 1 });
 
     res.json(blogs.map(b => b.toJSON()));
   } catch (e) {
@@ -28,19 +30,23 @@ blogsRouter.get('/:id', async (req, res, next) => {
 });
 
 blogsRouter.post('/', async (req, res, next) => {
-  const { userId } = req.body;
-  const user = await User.findById(userId);
-
-  const blog = new Blog({
-    ...req.body,
-    user: userId,
-  });
-  delete blog.userId;
-
   try {
+    const decodedToken = jwt.verify(req.token, process.env.SECRET);
+
+    if (!token || !decodedToken.id) {
+      return res.status(401).json({ error: 'token missing or invalid' });
+    }
+
+    const user = await User.findById(decodedToken.id);
+
+    const blog = new Blog({
+      ...req.body,
+      user: decodedToken.id,
+    });
+
     const savedBlog = await blog.save();
 
-    user.blogs = [savedBlog, ...user.blogs];
+    user.blogs = [savedBlog._id, ...user.blogs];
     await user.save();
 
     res.json(savedBlog.toJSON());
