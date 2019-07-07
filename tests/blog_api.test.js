@@ -9,6 +9,7 @@ const {
   newBlog,
   emptyBlog,
   blogsInDb,
+  authorize,
 } = require('./test_helper');
 
 const api = supertest(app);
@@ -16,8 +17,12 @@ const api = supertest(app);
 describe('when blogs present in db', () => {
   beforeEach(async () => {
     await Blog.deleteMany({});
-    const blogObjects = blogs.map(blog => new Blog(blog));
-    const promises = blogObjects.map(blog => blog.save());
+    const token = await authorize(api);
+
+    const promises = blogs.map(blog => api
+      .post('/api/blogs')
+      .set('Authorization', `bearer ${token}`)
+      .send(blog));
     await Promise.all(promises);
   });
 
@@ -38,9 +43,12 @@ describe('when blogs present in db', () => {
 
   describe('adding a new blog', () => {
     test('succeeds with status 200 and valid data', async () => {
+      const token = await authorize(api);
+
       await api
         .post('/api/blogs')
         .send(newBlog)
+        .set('Authorization', `bearer ${token}`)
         .expect(200)
         .expect('Content-Type', /application\/json/);
 
@@ -53,9 +61,12 @@ describe('when blogs present in db', () => {
     });
 
     test('defaults likes prop to 0 when missing from request', async () => {
+      const token = await authorize(api);
+
       await api
         .post('/api/blogs')
         .send(newBlog)
+        .set('Authorization', `bearer ${token}`)
         .expect(200)
         .expect('Content-Type', /application\/json/);
 
@@ -65,10 +76,21 @@ describe('when blogs present in db', () => {
     });
 
     test('responds with 400 when url and/or title missing', async () => {
+      const token = await authorize(api);
+
       await api
         .post('/api/blogs')
+        .set('Authorization', `bearer ${token}`)
         .send(emptyBlog)
         .expect(400);
+    });
+
+    test('fails with status 401 when auth token invalid', async () => {
+      await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .set('Authorization', 'bearer invalid')
+        .expect(401);
     });
   });
 
@@ -127,22 +149,31 @@ describe('when blogs present in db', () => {
 
   describe('deleting a blog', () => {
     test('succeeds with status 204 when id is valid', async () => {
+      const token = await authorize(api);
+
       const existingBlogs = await blogsInDb();
       const { id } = existingBlogs[Math.floor(Math.random() * existingBlogs.length)];
       await api
         .delete(`/api/blogs/${id}`)
+        .set('Authorization', `bearer ${token}`)
         .expect(204);
     });
 
     test('fails with status 404 when blog does not exist', async () => {
+      const token = await authorize(api);
+
       await api
         .delete(`/api/blogs/${missingId}`)
+        .set('Authorization', `bearer ${token}`)
         .expect(404);
     });
 
     test('fails with status 400 when id invalid', async () => {
+      const token = await authorize(api);
+
       await api
         .delete(`/api/blogs/${invalidId}`)
+        .set('Authorization', `bearer ${token}`)
         .expect(400);
     });
   });

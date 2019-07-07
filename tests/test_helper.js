@@ -16,7 +16,9 @@ const emptyBlog = {
 };
 
 const blogsInDb = async () => {
-  const blogs = await Blog.find({});
+  const blogs = await Blog
+    .find({})
+    .populate('user', { name: 1, username: 1 });
   return blogs.map(blog => blog.toJSON());
 };
 
@@ -35,6 +37,12 @@ const usersInDb = async () => {
   return users.map(u => u.toJSON());
 };
 
+const authorize = async (api) => {
+  await api.post('/api/users').send(defaultUser);
+  const response = await api.post('/api/login').send(defaultUser);
+  return response.body.token;
+}
+
 module.exports = {
   invalidId,
   missingId,
@@ -44,4 +52,5 @@ module.exports = {
   blogsInDb,
   defaultUser,
   usersInDb,
+  authorize,
 };

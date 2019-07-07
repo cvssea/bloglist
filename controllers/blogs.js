@@ -19,7 +19,9 @@ blogsRouter.get('/', async (req, res, next) => {
 
 blogsRouter.get('/:id', async (req, res, next) => {
   try {
-    const foundBlog = await Blog.findById(req.params.id);
+    const foundBlog = await Blog
+      .findById(req.params.id)
+      .populate('user', { name: 1, username: 1 });
     if (foundBlog) {
       return res.json(foundBlog.toJSON());
     }
@@ -33,7 +35,7 @@ blogsRouter.post('/', async (req, res, next) => {
   try {
     const decodedToken = jwt.verify(req.token, process.env.SECRET);
 
-    if (!token || !decodedToken.id) {
+    if (!req.token || !decodedToken.id) {
       return res.status(401).json({ error: 'token missing or invalid' });
     }
 
@@ -74,10 +76,23 @@ blogsRouter.put('/:id', async (req, res, next) => {
 
 blogsRouter.delete('/:id', async (req, res, next) => {
   try {
+    const decodedToken = jwt.verify(req.token, process.env.SECRET);
+    if (!req.token || !decodedToken.id) {
+      return res.status(401).json({ error: 'token missing or invalid' });
+    }
+
+    const blogToDelete = await Blog.findById(req.params.id);
+    if (blogToDelete && blogToDelete.user.toString() !== decodedToken.id) {
+      return res
+        .status(401)
+        .json({ error: 'you may only delete your own blogs' });
+    }
+
     const deletedBlog = await Blog.findByIdAndRemove(req.params.id);
     if (deletedBlog) {
       return res.status(204).end();
     }
+
     return res.status(404).end();
   } catch (e) {
     next(e);
