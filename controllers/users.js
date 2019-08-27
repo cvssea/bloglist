@@ -5,9 +5,9 @@ const { PasswordError } = require('./helpers/users_helper');
 
 usersRouter.get('/', async (req, res, next) => {
   try {
-    const users = await User
-      .find({})
-      .populate('blogs', { author: 1, url: 1, title: 1 });
+    const users = await User.find({}).populate('blogs', {
+      author: 1, url: 1, title: 1, likes: 1,
+    });
 
     res.json(users);
   } catch (e) {

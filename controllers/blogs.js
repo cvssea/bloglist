@@ -7,9 +7,7 @@ const User = require('../models/user');
 
 blogsRouter.get('/', async (req, res, next) => {
   try {
-    const blogs = await Blog
-      .find({})
-      .populate('user', { username: 1, name: 1 });
+    const blogs = await Blog.find({}).populate('user', { username: 1, name: 1 });
 
     res.json(blogs.map(b => b.toJSON()));
   } catch (e) {
@@ -19,9 +17,7 @@ blogsRouter.get('/', async (req, res, next) => {
 
 blogsRouter.get('/:id', async (req, res, next) => {
   try {
-    const foundBlog = await Blog
-      .findById(req.params.id)
-      .populate('user', { name: 1, username: 1 });
+    const foundBlog = await Blog.findById(req.params.id).populate('user', { name: 1, username: 1 });
     if (foundBlog) {
       return res.json(foundBlog.toJSON());
     }
@@ -57,13 +53,27 @@ blogsRouter.post('/', async (req, res, next) => {
   }
 });
 
+blogsRouter.post('/:id/comments', async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const foundBlog = await Blog.findById(id);
+    const comments = [req.body.comment, ...foundBlog.comments];
+    const updatedBlog = await Blog.findByIdAndUpdate(id, { comments }, { new: true });
+    if (updatedBlog) {
+      return res.json(updatedBlog.toJSON());
+    }
+    return res.status(400).end();
+  } catch (e) {
+    next(e);
+  }
+});
+
 blogsRouter.put('/:id', async (req, res, next) => {
   const { likes } = req.body;
   const { id } = req.params;
 
   try {
-    const updatedBlog = await Blog
-      .findByIdAndUpdate(id, { likes }, { new: true });
+    const updatedBlog = await Blog.findByIdAndUpdate(id, { likes }, { new: true });
 
     if (updatedBlog) {
       return res.json(updatedBlog.toJSON());
@@ -83,9 +93,7 @@ blogsRouter.delete('/:id', async (req, res, next) => {
 
     const blogToDelete = await Blog.findById(req.params.id);
     if (blogToDelete && blogToDelete.user.toString() !== decodedToken.id) {
-      return res
-        .status(401)
-        .json({ error: 'you may only delete your own blogs' });
+      return res.status(401).json({ error: 'you may only delete your own blogs' });
     }
 
     const deletedBlog = await Blog.findByIdAndRemove(req.params.id);
